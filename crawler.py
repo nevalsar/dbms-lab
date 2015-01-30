@@ -76,7 +76,8 @@ def getMovie(id):
 		movie['votes'] = ""
 	return movie
 
-def insertMovie(movie_id, movie):
+def insertMovie(movie_id):
+	movie = getMovie(movie_id)
 	con = db.connect('localhost', 'root', 'root', 'imdb');
 
 	with con:
@@ -91,21 +92,58 @@ def insertMovie(movie_id, movie):
 		print query
 	    cur.execute(query)
 
+def getPerson(person_id):
+	doc = lxml.html.document_fromstring(requests.get("http://www.imdb.com/name/" + str(person_id)).content)
+	person = {}
+
+	try:
+		person['name'] = doc.get_element_by_id("overview-top").find_class("header")[0].find("span").text_content()
+	except IndexError:
+		person['name'] = ""
+	try:
+		person['dob'] = doc.get_element_by_id("name-born-info").find("time").get("datetime")
+	except (IndexError, KeyError, AttributeError):
+		person['dob'] = ""
+	try:
+		person['gender'] = doc.get_element_by_id("name-job-categories").find("a").find("span").text_content().strip()
+		person['gender'] = ('F', 'M')[person['gender'] == 'Actor']
+	except IndexError:
+		person['gender'] = ""
+
+	return person
+
+def insertPerson(person_id):
+	person = getPerson(person_id)
+	con = db.connect('localhost', 'root', 'root', 'imdb');
+
+	with con:
+	    cur = con.cursor()
+	    query = "INSERT INTO Person(PID, Name, DOB, Gender) VALUES("\
+	    		+ "'" + person_id 			+ "', "\
+	    		+ "'" + person['name'] 		+ "', "\
+	    		+ "'" + person['dob'] 		+ "', "\
+	    		+ "'" + person['gender'] 		+ "'"\
+	    		+ ")";\
+		print query
+	    cur.execute(query)
+
 def getMovieID(pageCount):
     for i in range(pageCount):
 
 		listPage = "http://www.imdb.com/search/title?languages=hi|1&num_votes=50,&sort=user_rating,desc&start=" + str(i * 50) + "&title_type=feature"
-		print listPage
-		doc = lxml.html.document_fromstring(requests.get(listPage).content)
-		movies_list = doc.find_class("results")[0].findall("tr")[1:]
+		page_top_movies = lxml.html.document_fromstring(requests.get(listPage).content)
+		list_top_movies = page_top_movies.find_class("results")[0].findall("tr")
+		list_top_movies[:] = [movie.findall("td")[2].find("a").get("href")[7:-1] for movie in list_top_movies if len(movie.findall("td"))>2]
 
-		for movie in movies_list:
-			movie_name = movie.findall("td")[2].find("a").text_content()
-			movie_id = movie.findall("td")[2].find("a").get("href")[7:-1]
-			movie_link = 'http://imdb.com/title/' + movie_id
-			print movie_name, movie_link
-			movie = getMovie(movie_id)
-			insertMovie(movie_id, movie)
+		for movie_id in list_top_movies:
+			insertMovie(movie_id)
+
+			page_movie = lxml.html.document_fromstring(requests.get("http://www.imdb.com/title/" + movie_id + "/fullcredits").content)
+			list_actors = page_movie.find_class("cast_list")[0].findall("tr")
+			list_actors[:] = [actor.findall("td")[1].find("a").get("href")[6:15] for actor in list_actors if len(actor.findall("td"))>1]
+
+			for actor_id in list_actors:
+				insertPerson(actor_id)
 
 if __name__ == "__main__":
     getMovieID(1)

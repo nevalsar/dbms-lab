@@ -76,8 +76,7 @@ def getMovie(id):
 		movie['votes'] = ""
 	return movie
 
-def insertMovie(movie_id):
-	movie = getMovie(movie_id)
+def insertMovie(movie_id, movie):
 	con = db.connect('localhost', 'root', 'root', 'imdb');
 
 	with con:
@@ -127,6 +126,13 @@ def insertPerson(person_id):
 		print query
 	    cur.execute(query)
 
+def getGenres(page_movie):
+	list_genres = page_movie.find_class("info")
+	list_genres[:] = [a.find('div') for a in list_genres if 'Genre' in a.find('h5').text_content()]
+	list_genres[:] = list_genres[0].findall('a')
+	list_genres[:] = [a.text_content() for a in list_genres]
+	return list_genres
+
 def insertGenre(genre_name):
 	con = db.connect('localhost', 'root', 'root', 'imdb');
 
@@ -138,18 +144,16 @@ def insertGenre(genre_name):
 		print query
 	    cur.execute(query)
 
-def insertLanguage(page_movie):
-	language = page_movie.get_element_by_id("titleDetails").findall("div")
-	language[:] = [ lang.find('a') for lang in language if (lang.find('h4') is not None and 'Language' in lang.find('h4').text_content()) ]
-	language[:] = [(lang.get("href"), lang.text_content()) for lang in language]
-	if(len(language)) > 1:
-		print "Multilingual movie spotted"
-		for x in language:
-			print x
+def getLanguages(page_movie):
+	list_lang = page_movie.find_class("info")
+	list_lang[:] = [a.find('div') for a in list_lang if 'Language' in a.find('h5').text_content()]
+	list_lang[:] = list_lang[0].findall('a')
+	list_lang[:] = [[a.get('href'), a.text_content()] for a in list_lang]
+	return list_lang
 
-	lang_id = language[0][0][10:language[0][0].find('?')]
-	lang_name = language[0][1]
-
+def insertLanguage(list_lang):
+	lang_id = list_lang[0][10:]
+	lang_name = list_lang[1]
 	con = db.connect('localhost', 'root', 'root', 'imdb');
 	with con:
 	    cur = con.cursor()
@@ -160,17 +164,17 @@ def insertLanguage(page_movie):
 		print query
 	    cur.execute(query)
 
-def insertCountry(page_movie):
-	country = page_movie.get_element_by_id("titleDetails").findall("div")
-	country[:] = [ element.find('a') for element in country if (element.find('h4') is not None and 'Country' in element.find('h4').text_content()) ]
-	country[:] = [(element.get("href"), element.text_content()) for element in country]
-	if(len(country)) > 1:
-		print "Multinational movie spotted"
-		for x in country:
-			print x
+def getCountry(page_movie):
+	list_country = page_movie.find_class("info")
+	list_country[:] = [a.find('div') for a in list_country if 'Country' in a.find('h5').text_content()]
+	list_country[:] = list_country[0].findall('a')
+	list_country[:] = [[a.get('href'), a.text_content()] for a in list_country]
+	return list_country
 
-	country_id = country[0][0][9:country[0][0].find('?')]
-	country_name = country[0][1]
+def insertCountry(country):
+
+	country_id = country[0][9:]
+	country_name = country[1]
 
 	con = db.connect('localhost', 'root', 'root', 'imdb');
 	with con:
@@ -182,7 +186,7 @@ def insertCountry(page_movie):
 		print query
 	    cur.execute(query)
 
-def getMovieID(pageCount):
+def crawlIMDB(pageCount):
     for i in range(pageCount):
 
 		listPage = "http://www.imdb.com/search/title?languages=hi|1&num_votes=50,&sort=user_rating,desc&start=" + str(i * 50) + "&title_type=feature"
@@ -191,22 +195,32 @@ def getMovieID(pageCount):
 		list_top_movies[:] = [movie.findall("td")[2].find("a").get("href")[7:-1] for movie in list_top_movies if len(movie.findall("td"))>2]
 
 		for movie_id in list_top_movies:
-			insertMovie(movie_id)
-			page_movie = lxml.html.document_fromstring(requests.get("http://www.imdb.com/title/" + movie_id + "/fullcredits").content)
+			movie = getMovie(movie_id)
+			insertMovie(movie_id, movie)
+			page_movie = lxml.html.document_fromstring(requests.get("http://www.imdb.com/title/" + movie_id + "/combined").content)
 
-			list_actors = page_movie.find_class("cast_list")[0].findall("tr")
+			list_actors = page_movie.find_class("cast")[0].findall("tr")
 			list_actors[:] = [actor.findall("td")[1].find("a").get("href")[6:15] for actor in list_actors if len(actor.findall("td"))>1]
-			for actor_id in list_actors:
-				insertPerson(actor_id)
+			# for actor_id in list_actors:
+				# insertPerson(actor_id)
 
-			page_movie = lxml.html.document_fromstring(requests.get("http://www.imdb.com/title/" + movie_id).content)
-			list_genres = page_movie.find_class("infobar")[0].findall("a")
-			list_genres[:] = [a.find("span").text_content() for a in list_genres]
-			for genre in list_genres:
-				insertGenre(genre);
+			list_genres = getGenres(page_movie)
+			# for genre in list_genres:
+				# insertGenre(genre);
 
-			insertLanguage(page_movie)
-			insertCountry(page_movie)
+			list_lang = getLanguages(page_movie)
+			if(len(list_lang)) > 1:
+				print "Multilingual movie entered"
+				for x in list_lang:
+					print x
+			# insertLanguage(list_lang[0])
+
+			list_country = getCountry(page_movie)
+			if(len(list_country)) > 1:
+				print "Multinational movie entered"
+				for x in list_lang:
+					print x
+			# insertCountry(list_country[0])
 
 if __name__ == "__main__":
-    getMovieID(1)
+    crawlIMDB(1)

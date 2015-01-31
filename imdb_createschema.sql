@@ -24,13 +24,13 @@ create table Genre (
 );
 
 create table Language (
-   LAID CHAR(3),
+   LAID VARCHAR(3),
    Name VARCHAR(25) UNIQUE,
    PRIMARY KEY(LAID)
 );
 
 create table Country (
-   CID CHAR(4),
+   CID VARCHAR(4),
    Name VARCHAR(45) UNIQUE,
    PRIMARY KEY(CID)
 );

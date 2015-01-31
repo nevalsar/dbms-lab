@@ -127,6 +127,17 @@ def insertPerson(person_id):
 		print query
 	    cur.execute(query)
 
+def insertGenre(genre_name):
+	con = db.connect('localhost', 'root', 'root', 'imdb');
+
+	with con:
+	    cur = con.cursor()
+	    query = "INSERT INTO Genre(Name) VALUES("\
+	    		+ "'" + genre_name 		+ "'"\
+	    		+ ")";\
+		print query
+	    cur.execute(query)
+
 def getMovieID(pageCount):
     for i in range(pageCount):
 
@@ -137,13 +148,19 @@ def getMovieID(pageCount):
 
 		for movie_id in list_top_movies:
 			insertMovie(movie_id)
-
 			page_movie = lxml.html.document_fromstring(requests.get("http://www.imdb.com/title/" + movie_id + "/fullcredits").content)
+
 			list_actors = page_movie.find_class("cast_list")[0].findall("tr")
 			list_actors[:] = [actor.findall("td")[1].find("a").get("href")[6:15] for actor in list_actors if len(actor.findall("td"))>1]
-
 			for actor_id in list_actors:
 				insertPerson(actor_id)
+
+			page_movie = lxml.html.document_fromstring(requests.get("http://www.imdb.com/title/" + movie_id).content)
+			list_genres = page_movie.find_class("infobar")[0].findall("a")
+			list_genres[:] = [a.find("span").text_content() for a in list_genres]
+
+			for genre in list_genres:
+				insertGenre(genre);
 
 if __name__ == "__main__":
     getMovieID(1)

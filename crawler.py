@@ -138,6 +138,50 @@ def insertGenre(genre_name):
 		print query
 	    cur.execute(query)
 
+def insertLanguage(page_movie):
+	language = page_movie.get_element_by_id("titleDetails").findall("div")
+	language[:] = [ lang.find('a') for lang in language if (lang.find('h4') is not None and 'Language' in lang.find('h4').text_content()) ]
+	language[:] = [(lang.get("href"), lang.text_content()) for lang in language]
+	if(len(language)) > 1:
+		print "Multilingual movie spotted"
+		for x in language:
+			print x
+
+	lang_id = language[0][0][10:language[0][0].find('?')]
+	lang_name = language[0][1]
+
+	con = db.connect('localhost', 'root', 'root', 'imdb');
+	with con:
+	    cur = con.cursor()
+	    query = "INSERT INTO Language(LAID, Name) VALUES("\
+	    		+ "'" + lang_id 			+ "', "\
+	    		+ "'" + lang_name 		+ "'"\
+	    		+ ")";\
+		print query
+	    cur.execute(query)
+
+def insertCountry(page_movie):
+	country = page_movie.get_element_by_id("titleDetails").findall("div")
+	country[:] = [ element.find('a') for element in country if (element.find('h4') is not None and 'Country' in element.find('h4').text_content()) ]
+	country[:] = [(element.get("href"), element.text_content()) for element in country]
+	if(len(country)) > 1:
+		print "Multinational movie spotted"
+		for x in country:
+			print x
+
+	country_id = country[0][0][9:country[0][0].find('?')]
+	country_name = country[0][1]
+
+	con = db.connect('localhost', 'root', 'root', 'imdb');
+	with con:
+	    cur = con.cursor()
+	    query = "INSERT INTO Country(CID, Name) VALUES("\
+	    		+ "'" + country_id 			+ "', "\
+	    		+ "'" + country_name 		+ "'"\
+	    		+ ")";\
+		print query
+	    cur.execute(query)
+
 def getMovieID(pageCount):
     for i in range(pageCount):
 
@@ -158,9 +202,11 @@ def getMovieID(pageCount):
 			page_movie = lxml.html.document_fromstring(requests.get("http://www.imdb.com/title/" + movie_id).content)
 			list_genres = page_movie.find_class("infobar")[0].findall("a")
 			list_genres[:] = [a.find("span").text_content() for a in list_genres]
-
 			for genre in list_genres:
 				insertGenre(genre);
+
+			insertLanguage(page_movie)
+			insertCountry(page_movie)
 
 if __name__ == "__main__":
     getMovieID(1)

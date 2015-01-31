@@ -80,7 +80,7 @@ create table M_Genre (
 create table M_Language (
   ID MEDIUMINT AUTO_INCREMENT,
   MID CHAR(9),
-  LAID CHAR(3),
+  LAID VARCHAR(3),
   PRIMARY KEY(ID),
   FOREIGN KEY(MID) REFERENCES Movie(MID),
   FOREIGN KEY(LAID) REFERENCES Language(LAID)
@@ -89,7 +89,7 @@ create table M_Language (
 create table M_Country (
   ID MEDIUMINT AUTO_INCREMENT,
   MID CHAR(9),
-  CID CHAR(4),
+  CID VARCHAR(4),
   PRIMARY KEY(ID),
   FOREIGN KEY(MID) REFERENCES Movie(MID),
   FOREIGN KEY(CID) REFERENCES Country(CID)

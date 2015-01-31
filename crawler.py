@@ -71,7 +71,8 @@ def getMovie(id):
 	except IndexError:
 		movie['storyline'] = ""
 	try:
-		movie['votes'] = hxs.xpath('//*[@id="overview-top"]/div[3]/div[3]/a[1]/span/text()')[0].strip()
+		votes = hxs.xpath('//*[@id="overview-top"]/div[3]/div[3]/a[1]/span/text()')[0].strip()
+		movie['votes'] = votes.replace(',', '')
 	except IndexError:
 		movie['votes'] = ""
 	return movie
@@ -186,6 +187,25 @@ def insertCountry(country):
 		print query
 	    cur.execute(query)
 
+def getLocations(movie_id):
+
+	locationPage = "http://www.imdb.com/title/"+ movie_id + "/locations"
+	list_locations = lxml.html.document_fromstring(requests.get(locationPage).content).get_element_by_id('filming_locations_content').find_class('sodavote')
+	list_locations[:] = [location.find('dt').find('a').text_content() for location in list_locations if location.find('dt').find('a') is not None]
+
+	return list_locations
+
+def insertLocation(location):
+
+	con = db.connect('localhost', 'root', 'root', 'imdb');
+	with con:
+	    cur = con.cursor()
+	    query = "INSERT INTO Location(Name) VALUES("\
+	    		+ "'" + location 		+ "'"\
+	    		+ ")";\
+		print query
+	    cur.execute(query)
+
 def crawlIMDB(pageCount):
     for i in range(pageCount):
 
@@ -201,26 +221,31 @@ def crawlIMDB(pageCount):
 
 			list_actors = page_movie.find_class("cast")[0].findall("tr")
 			list_actors[:] = [actor.findall("td")[1].find("a").get("href")[6:15] for actor in list_actors if len(actor.findall("td"))>1]
-			# for actor_id in list_actors:
-				# insertPerson(actor_id)
+			for actor_id in list_actors:
+				insertPerson(actor_id)
 
 			list_genres = getGenres(page_movie)
-			# for genre in list_genres:
-				# insertGenre(genre);
+			for genre in list_genres:
+				insertGenre(genre);
 
 			list_lang = getLanguages(page_movie)
 			if(len(list_lang)) > 1:
 				print "Multilingual movie entered"
 				for x in list_lang:
 					print x
-			# insertLanguage(list_lang[0])
+			insertLanguage(list_lang[0])
 
 			list_country = getCountry(page_movie)
 			if(len(list_country)) > 1:
 				print "Multinational movie entered"
 				for x in list_lang:
 					print x
-			# insertCountry(list_country[0])
+			insertCountry(list_country[0])
+
+			list_locations = getLocations(movie_id)
+			if list_locations is not None:
+				for location in list_locations:
+					insertLocation(location)
 
 if __name__ == "__main__":
     crawlIMDB(1)

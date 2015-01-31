@@ -1,5 +1,3 @@
-drop table Movie,Person,Genre,Language,Country,Location,M_Producer,M_Director,M_Cast,M_Genre,M_Language,M_Country,M_Location;
-
 create table Movie(
   MID CHAR(9),
   title VARCHAR(50),

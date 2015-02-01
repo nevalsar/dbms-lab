@@ -206,6 +206,15 @@ def insertLocation(location):
 		print query
 	    cur.execute(query)
 
+def getDirector(page_movie):
+	director = page_movie.get_element_by_id('director-info')
+	if director is not None:
+		dir_a = director.find('div').find('a')
+		print dir_a.get('href')[6:-1], dir_a.text_content()
+	else:
+		print "NOPE"
+	return (dir_a.get('href')[6:-1], dir_a.text_content())
+
 def crawlIMDB(nextPage, tablePrefix, pageCount = 5):
     for i in range(pageCount):
 		page_top_movies = lxml.html.document_fromstring(requests.get(nextPage).content)
@@ -245,6 +254,8 @@ def crawlIMDB(nextPage, tablePrefix, pageCount = 5):
 			if list_locations is not None:
 				for location in list_locations:
 					insertLocation(location)
+
+			director = getDirector(page_movie)
 
 def startCrawlIMDB():
 	crawlParam = open("setup.txt")

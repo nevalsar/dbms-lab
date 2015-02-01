@@ -9,20 +9,7 @@ try:
 
     cur = con.cursor()
 
-    cur.execute("DROP TABLE M_Location;")
-    cur.execute("DROP TABLE M_Country;")
-    cur.execute("DROP TABLE M_Language;")
-    cur.execute("DROP TABLE M_Genre;")
-    cur.execute("DROP TABLE M_Cast;")
-    cur.execute("DROP TABLE M_Director;")
-    cur.execute("DROP TABLE M_Producer;")
-    cur.execute("DROP TABLE Location;")
-    cur.execute("DROP TABLE Country;")
-    cur.execute("DROP TABLE Language;")
-    cur.execute("DROP TABLE Genre;")
-    cur.execute("DROP TABLE Person;")
-    cur.execute("DROP TABLE Movie;")
-
+    cur.execute("DROP TABLE M_Location, M_Country, M_Language, M_Genre, M_Cast, M_Director, M_Producer, Location, Country, Language, Genre, Person, Movie")
     print "Tables dropped"
 
 except mdb.Error, e:

@@ -155,11 +155,11 @@ def getLanguages(page_movie):
 	list_lang = page_movie.find_class("info")
 	list_lang[:] = [a.find('div') for a in list_lang if 'Language' in a.find('h5').text_content()]
 	list_lang[:] = list_lang[0].findall('a')
-	list_lang[:] = [[a.get('href'), a.text_content()] for a in list_lang]
+	list_lang[:] = [[a.get('href')[10:], a.text_content()] for a in list_lang]
 	return list_lang
 
 def insertLanguage(list_lang):
-	lang_id = list_lang[0][10:]
+	lang_id = list_lang[0]
 	lang_name = list_lang[1]
 	con = db.connect('localhost', 'root', 'root', 'imdb');
 	with con:
@@ -256,6 +256,19 @@ def insertMGenre(movie_id, genre_id):
 		print query
 	    cur.execute(query)
 
+def insertMLang(movie_id, lang_id):
+	insertLanguage(lang_id)
+	lang_id = lang_id[0]
+	con = db.connect('localhost', 'root', 'root', 'imdb');
+	with con:
+	    cur = con.cursor()
+	    query = "INSERT INTO M_Language(MID, LAID) VALUES("\
+	    		+ "'" + movie_id	 		+ "', "\
+	    		+ "'" + lang_id 		+ "'"\
+	    		+ ")";\
+		print query
+	    cur.execute(query)
+
 def crawlIMDB(nextPage, tablePrefix, pageCount = 5):
     for i in range(pageCount):
 		page_top_movies = lxml.html.document_fromstring(requests.get(nextPage).content)
@@ -283,7 +296,7 @@ def crawlIMDB(nextPage, tablePrefix, pageCount = 5):
 				print "Multilingual movie entered"
 				for x in list_lang:
 					print x
-			# insertLanguage(list_lang[0])
+			insertMLang(movie_id, list_lang[0])
 
 			list_country = getCountry(page_movie)
 			if(len(list_country)) > 1:

@@ -218,7 +218,7 @@ def getDirector(page_movie):
 		print "NOPE"
 	return (dir_a.get('href')[6:-1], dir_a.text_content())
 
-def insertDirector(director, movie_id):
+def insertMDirector(movie_id, director):
 	insertPerson(director[0])
 	con = db.connect('localhost', 'root', 'root', 'imdb');
 	with con:
@@ -226,6 +226,18 @@ def insertDirector(director, movie_id):
 	    query = "INSERT INTO M_Director(MID, PID) VALUES("\
 	    		+ "'" + movie_id	 		+ "', "\
 	    		+ "'" + director[0] 		+ "'"\
+	    		+ ")";\
+		print query
+	    cur.execute(query)
+
+def insertMCast(movie_id, actor_id):
+	insertPerson(actor_id)
+	con = db.connect('localhost', 'root', 'root', 'imdb');
+	with con:
+	    cur = con.cursor()
+	    query = "INSERT INTO M_Cast(MID, PID) VALUES("\
+	    		+ "'" + movie_id	 		+ "', "\
+	    		+ "'" + actor_id 		+ "'"\
 	    		+ ")";\
 		print query
 	    cur.execute(query)
@@ -244,8 +256,8 @@ def crawlIMDB(nextPage, tablePrefix, pageCount = 5):
 
 			list_actors = page_movie.find_class("cast")[0].findall("tr")
 			list_actors[:] = [actor.findall("td")[1].find("a").get("href")[6:15] for actor in list_actors if len(actor.findall("td"))>1]
-			# for actor_id in list_actors:
-			# 	insertPerson(actor_id)
+			for actor_id in list_actors:
+				insertMCast(movie_id, actor_id)
 
 			list_genres = getGenres(page_movie)
 			# for genre in list_genres:
@@ -271,7 +283,7 @@ def crawlIMDB(nextPage, tablePrefix, pageCount = 5):
 			# 		insertLocation(location)
 
 			director = getDirector(page_movie)
-			insertDirector(director, movie_id)
+			# insertMDirector(movie_id, director)
 
 def startCrawlIMDB():
 	crawlParam = open("setup.txt")

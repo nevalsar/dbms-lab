@@ -147,6 +147,9 @@ def insertGenre(genre_name):
 	    		+ ")";\
 		print query
 	    cur.execute(query)
+	    query = "SELECT GID FROM Genre WHERE Name = '" + genre_name + "';"
+	    cur.execute(query)
+	    return cur.fetchone()
 
 def getLanguages(page_movie):
 	list_lang = page_movie.find_class("info")
@@ -242,6 +245,17 @@ def insertMCast(movie_id, actor_id):
 		print query
 	    cur.execute(query)
 
+def insertMGenre(movie_id, genre_id):
+	con = db.connect('localhost', 'root', 'root', 'imdb');
+	with con:
+	    cur = con.cursor()
+	    query = "INSERT INTO M_Genre(MID, GID) VALUES("\
+	    		+ "'" + movie_id	 		+ "', "\
+	    		+ "'" + genre_id 		+ "'"\
+	    		+ ")";\
+		print query
+	    cur.execute(query)
+
 def crawlIMDB(nextPage, tablePrefix, pageCount = 5):
     for i in range(pageCount):
 		page_top_movies = lxml.html.document_fromstring(requests.get(nextPage).content)
@@ -260,8 +274,9 @@ def crawlIMDB(nextPage, tablePrefix, pageCount = 5):
 				insertMCast(movie_id, actor_id)
 
 			list_genres = getGenres(page_movie)
-			# for genre in list_genres:
-			# 	insertGenre(genre);
+			for genre in list_genres:
+				genre_id = insertGenre(genre);
+				insertMGenre(movie_id, str(genre_id[0]))
 
 			list_lang = getLanguages(page_movie)
 			if(len(list_lang)) > 1:

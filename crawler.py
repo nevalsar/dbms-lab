@@ -206,11 +206,10 @@ def insertLocation(location):
 		print query
 	    cur.execute(query)
 
-def crawlIMDB(pageCount):
+def crawlIMDB(nextPage, tablePrefix, pageCount = 5):
     for i in range(pageCount):
-
-		listPage = "http://www.imdb.com/search/title?languages=hi|1&num_votes=50,&sort=user_rating,desc&start=" + str(i * 50) + "&title_type=feature"
-		page_top_movies = lxml.html.document_fromstring(requests.get(listPage).content)
+		page_top_movies = lxml.html.document_fromstring(requests.get(nextPage).content)
+		nextPage = "http://www.imdb.com" + str(page_top_movies.find_class("pagination")[0].findall('a')[-1].get('href'))
 		list_top_movies = page_top_movies.find_class("results")[0].findall("tr")
 		list_top_movies[:] = [movie.findall("td")[2].find("a").get("href")[7:-1] for movie in list_top_movies if len(movie.findall("td"))>2]
 
@@ -247,5 +246,11 @@ def crawlIMDB(pageCount):
 				for location in list_locations:
 					insertLocation(location)
 
+def startCrawlIMDB():
+	crawlParam = open("setup.txt")
+	pageLink = crawlParam.readline().strip()
+	tablePrefix = crawlParam.readline().strip()
+	crawlIMDB(pageLink, tablePrefix)
+
 if __name__ == "__main__":
-    crawlIMDB(1)
+    startCrawlIMDB()

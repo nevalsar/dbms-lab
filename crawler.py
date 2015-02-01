@@ -175,12 +175,12 @@ def getCountry(page_movie):
 	list_country = page_movie.find_class("info")
 	list_country[:] = [a.find('div') for a in list_country if 'Country' in a.find('h5').text_content()]
 	list_country[:] = list_country[0].findall('a')
-	list_country[:] = [[a.get('href'), a.text_content()] for a in list_country]
+	list_country[:] = [[a.get('href')[9:], a.text_content()] for a in list_country]
 	return list_country
 
 def insertCountry(country):
 
-	country_id = country[0][9:]
+	country_id = country[0]
 	country_name = country[1]
 
 	con = db.connect('localhost', 'root', 'root', 'imdb');
@@ -269,6 +269,19 @@ def insertMLang(movie_id, lang_id):
 		print query
 	    cur.execute(query)
 
+def insertMCountry(movie_id, country_id):
+	insertCountry(country_id)
+	country_id = country_id[0]
+	con = db.connect('localhost', 'root', 'root', 'imdb');
+	with con:
+	    cur = con.cursor()
+	    query = "INSERT INTO M_Country(MID, CID) VALUES("\
+	    		+ "'" + movie_id	 		+ "', "\
+	    		+ "'" + country_id 		+ "'"\
+	    		+ ")";\
+		print query
+	    cur.execute(query)
+
 def crawlIMDB(nextPage, tablePrefix, pageCount = 5):
     for i in range(pageCount):
 		page_top_movies = lxml.html.document_fromstring(requests.get(nextPage).content)
@@ -303,7 +316,7 @@ def crawlIMDB(nextPage, tablePrefix, pageCount = 5):
 				print "Multinational movie entered"
 				for x in list_lang:
 					print x
-			# insertCountry(list_country[0])
+			insertMCountry(movie_id, list_country[0])
 
 			list_locations = getLocations(movie_id)
 			# if list_locations is not None:

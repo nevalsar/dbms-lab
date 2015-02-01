@@ -105,8 +105,11 @@ def getPerson(person_id):
 	except (IndexError, KeyError, AttributeError):
 		person['dob'] = ""
 	try:
-		person['gender'] = doc.get_element_by_id("name-job-categories").find("a").find("span").text_content().strip()
-		person['gender'] = ('F', 'M')[person['gender'] == 'Actor']
+		person['gender'] = 'M'
+		list_jobs = doc.get_element_by_id("name-job-categories").findall("a")
+		for element in list_jobs:
+			if 'Actress' in element.find("span").text_content().strip():
+				person['gender'] = 'F'
 	except IndexError:
 		person['gender'] = ""
 

@@ -211,6 +211,9 @@ def insertLocation(location):
 	    		+ ")";\
 		print query
 	    cur.execute(query)
+	    query = "SELECT LID FROM Location WHERE Name = '" + location + "';"
+	    cur.execute(query)
+	    return cur.fetchone()
 
 def getDirector(page_movie):
 	director = page_movie.get_element_by_id('director-info')
@@ -282,6 +285,17 @@ def insertMCountry(movie_id, country_id):
 		print query
 	    cur.execute(query)
 
+def insertMLocation(movie_id, location_id):
+	con = db.connect('localhost', 'root', 'root', 'imdb');
+	with con:
+	    cur = con.cursor()
+	    query = "INSERT INTO M_Location(MID, LID) VALUES("\
+	    		+ "'" + movie_id	 		+ "', "\
+	    		+ "'" + location_id 		+ "'"\
+	    		+ ")";\
+		print query
+	    cur.execute(query)
+
 def crawlIMDB(nextPage, tablePrefix, pageCount = 5):
     for i in range(pageCount):
 		page_top_movies = lxml.html.document_fromstring(requests.get(nextPage).content)
@@ -319,12 +333,13 @@ def crawlIMDB(nextPage, tablePrefix, pageCount = 5):
 			insertMCountry(movie_id, list_country[0])
 
 			list_locations = getLocations(movie_id)
-			# if list_locations is not None:
-			# 	for location in list_locations:
-			# 		insertLocation(location)
+			if list_locations is not None:
+				for location in list_locations:
+					location_id = insertLocation(location)
+					insertMLocation(movie_id, str(location_id[0]))
 
 			director = getDirector(page_movie)
-			# insertMDirector(movie_id, director)
+			insertMDirector(movie_id, director)
 
 def startCrawlIMDB():
 	crawlParam = open("setup.txt")

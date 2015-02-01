@@ -218,6 +218,18 @@ def getDirector(page_movie):
 		print "NOPE"
 	return (dir_a.get('href')[6:-1], dir_a.text_content())
 
+def insertDirector(director, movie_id):
+	insertPerson(director[0])
+	con = db.connect('localhost', 'root', 'root', 'imdb');
+	with con:
+	    cur = con.cursor()
+	    query = "INSERT INTO M_Director(MID, PID) VALUES("\
+	    		+ "'" + movie_id	 		+ "', "\
+	    		+ "'" + director[0] 		+ "'"\
+	    		+ ")";\
+		print query
+	    cur.execute(query)
+
 def crawlIMDB(nextPage, tablePrefix, pageCount = 5):
     for i in range(pageCount):
 		page_top_movies = lxml.html.document_fromstring(requests.get(nextPage).content)
@@ -232,33 +244,34 @@ def crawlIMDB(nextPage, tablePrefix, pageCount = 5):
 
 			list_actors = page_movie.find_class("cast")[0].findall("tr")
 			list_actors[:] = [actor.findall("td")[1].find("a").get("href")[6:15] for actor in list_actors if len(actor.findall("td"))>1]
-			for actor_id in list_actors:
-				insertPerson(actor_id)
+			# for actor_id in list_actors:
+			# 	insertPerson(actor_id)
 
 			list_genres = getGenres(page_movie)
-			for genre in list_genres:
-				insertGenre(genre);
+			# for genre in list_genres:
+			# 	insertGenre(genre);
 
 			list_lang = getLanguages(page_movie)
 			if(len(list_lang)) > 1:
 				print "Multilingual movie entered"
 				for x in list_lang:
 					print x
-			insertLanguage(list_lang[0])
+			# insertLanguage(list_lang[0])
 
 			list_country = getCountry(page_movie)
 			if(len(list_country)) > 1:
 				print "Multinational movie entered"
 				for x in list_lang:
 					print x
-			insertCountry(list_country[0])
+			# insertCountry(list_country[0])
 
 			list_locations = getLocations(movie_id)
-			if list_locations is not None:
-				for location in list_locations:
-					insertLocation(location)
+			# if list_locations is not None:
+			# 	for location in list_locations:
+			# 		insertLocation(location)
 
 			director = getDirector(page_movie)
+			insertDirector(director, movie_id)
 
 def startCrawlIMDB():
 	crawlParam = open("setup.txt")

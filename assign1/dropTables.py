@@ -16,7 +16,7 @@ try:
 
     cur = con.cursor()
 
-    cur.execute("DROP TABLE M_Location, M_Country, M_Language, M_Genre, M_Cast, M_Director, M_Producer, Location, Country, Language, Genre, Person, Movie")
+    cur.execute("DROP TABLE 12CS10032_M_Location, 12CS10032_M_Country, 12CS10032_M_Language, 12CS10032_M_Genre, 12CS10032_M_Cast, 12CS10032_M_Director, 12CS10032_M_Producer, 12CS10032_Movie, 12CS10032_Person, 12CS10032_Genre, 12CS10032_Language, 12CS10032_Country, 12CS10032_Location")
     print "Tables dropped"
 
 except mdb.Error, e:
@@ -28,3 +28,6 @@ finally:
 
     if con:
         con.close()
+
+
+

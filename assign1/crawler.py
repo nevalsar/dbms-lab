@@ -94,7 +94,7 @@ def insertMovie(movie_id, movie):
         cur.execute(query)
 
         if cur.fetchone() is not None:
-            query = "INSERT INTO Movie(MID, title, year, rating, num_votes) VALUES("\
+            query = "INSERT INTO " + tablePrefix + "_Movie(MID, title, year, rating, num_votes) VALUES("\
                 + "'" + movie_id             + "', "\
                 + "'" + movie['title']         + "', "\
                 + "'" + movie['year']         + "', "\
@@ -139,7 +139,7 @@ def insertPerson(person_id):
         cur.execute(query)
 
         if cur.fetchone() is not None:
-            query = "INSERT INTO Person(PID, Name, DOB, Gender) VALUES("\
+            query = "INSERT INTO " + tablePrefix + "_Person(PID, Name, DOB, Gender) VALUES("\
                     + "'" + person_id             + "', "\
                     + "'" + person['name']         + "', "\
                     + "'" + person['dob']         + "', "\
@@ -166,7 +166,7 @@ def insertGenre(genre_name):
         cur.execute(query)
 
         if cur.fetchone() is not None:
-            query = "INSERT INTO Genre(Name) VALUES("\
+            query = "INSERT INTO " + tablePrefix + "_Genre(Name) VALUES("\
                     + "'" + genre_name         + "'"\
                     + ")";\
             print query
@@ -195,7 +195,7 @@ def insertLanguage(list_lang):
         cur.execute(query)
 
         if cur.fetchone() is not None:
-            query = "INSERT INTO Language(LAID, Name) VALUES("\
+            query = "INSERT INTO " + tablePrefix + "_Language(LAID, Name) VALUES("\
                     + "'" + lang_id             + "', "\
                     + "'" + lang_name         + "'"\
                     + ")";\
@@ -222,7 +222,7 @@ def insertCountry(country):
         query = "SELECT * FROM Country where CID='" + country_id + "';"
 
         if cur.fetchone is not None:
-            query = "INSERT INTO Country(CID, Name) VALUES("\
+            query = "INSERT INTO " + tablePrefix + "_Country(CID, Name) VALUES("\
                     + "'" + country_id             + "', "\
                     + "'" + country_name         + "'"\
                     + ")";\
@@ -248,7 +248,7 @@ def insertLocation(location):
         cur.execute(query)
 
         if cur.fetchone() is not None:
-            query = "INSERT INTO Location(Name) VALUES("\
+            query = "INSERT INTO " + tablePrefix + "_Location(Name) VALUES("\
                     + "'" + location         + "'"\
                     + ")";\
             print query
@@ -274,7 +274,7 @@ def insertMDirector(movie_id, director):
     con = db.connect('localhost', 'root', 'root', 'imdb');
     with con:
         cur = con.cursor()
-        query = "INSERT INTO M_Director(MID, PID) VALUES("\
+        query = "INSERT INTO " + tablePrefix + "_M_Director(MID, PID) VALUES("\
                 + "'" + movie_id             + "', "\
                 + "'" + director[0]         + "'"\
                 + ")";\
@@ -286,7 +286,7 @@ def insertMCast(movie_id, actor_id):
     con = db.connect('localhost', 'root', 'root', 'imdb');
     with con:
         cur = con.cursor()
-        query = "INSERT INTO M_Cast(MID, PID) VALUES("\
+        query = "INSERT INTO " + tablePrefix + "_M_Cast(MID, PID) VALUES("\
                 + "'" + movie_id             + "', "\
                 + "'" + actor_id         + "'"\
                 + ")";\
@@ -297,7 +297,7 @@ def insertMGenre(movie_id, genre_id):
     con = db.connect('localhost', 'root', 'root', 'imdb');
     with con:
         cur = con.cursor()
-        query = "INSERT INTO M_Genre(MID, GID) VALUES("\
+        query = "INSERT INTO " + tablePrefix + "_M_Genre(MID, GID) VALUES("\
                 + "'" + movie_id             + "', "\
                 + "'" + genre_id         + "'"\
                 + ")";\
@@ -310,7 +310,7 @@ def insertMLang(movie_id, lang_id):
     con = db.connect('localhost', 'root', 'root', 'imdb');
     with con:
         cur = con.cursor()
-        query = "INSERT INTO M_Language(MID, LAID) VALUES("\
+        query = "INSERT INTO " + tablePrefix + "_M_Language(MID, LAID) VALUES("\
                 + "'" + movie_id             + "', "\
                 + "'" + lang_id         + "'"\
                 + ")";\
@@ -323,7 +323,7 @@ def insertMCountry(movie_id, country_id):
     con = db.connect('localhost', 'root', 'root', 'imdb');
     with con:
         cur = con.cursor()
-        query = "INSERT INTO M_Country(MID, CID) VALUES("\
+        query = "INSERT INTO " + tablePrefix + "_M_Country(MID, CID) VALUES("\
                 + "'" + movie_id             + "', "\
                 + "'" + country_id         + "'"\
                 + ")";\
@@ -334,7 +334,7 @@ def insertMLocation(movie_id, location_id):
     con = db.connect('localhost', 'root', 'root', 'imdb');
     with con:
         cur = con.cursor()
-        query = "INSERT INTO M_Location(MID, LID) VALUES("\
+        query = "INSERT INTO " + tablePrefix + "_M_Location(MID, LID) VALUES("\
                 + "'" + movie_id             + "', "\
                 + "'" + location_id         + "'"\
                 + ")";\

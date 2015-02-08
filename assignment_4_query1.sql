@@ -192,8 +192,8 @@ JOIN pratip_M_Cast USING(PID)
 WHERE PID IN
     (SELECT A.PID
      FROM pratip_M_Cast AS A
-     JOIN pratip_M_Cast AS B USING (MID)
-     JOIN pratip_M_Cast AS C USING (MID)
+     JOIN pratip_M_Cast AS B ON (A.MID = B.MID)
+     JOIN pratip_M_Cast AS C ON (B.MID = C.MID)
      WHERE A.PID != C.PID
        AND B.PID != C.PID
        AND C.PID = 'nm0451321'
